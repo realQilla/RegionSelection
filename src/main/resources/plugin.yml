@@ -1,0 +1,5 @@
+name: SelectionPlugin
+version: '${version}'
+main: net.qilla.selectionplugin.SelectionPlugin
+api-version: '1.21'
+load: STARTUP
