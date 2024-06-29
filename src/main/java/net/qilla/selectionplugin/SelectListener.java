@@ -48,7 +48,7 @@ public class SelectListener implements Listener {
             WandVariant wandVariant = list.get(selected);
             playerSettings.setVariant(wandVariant);
             player.sendActionBar(MiniMessage.miniMessage().deserialize("<yellow>Wand variant set to <#" + wandVariant.getHex() + "><bold>" + wandVariant + "</#" + wandVariant.getHex() + "></yellow>"));
-            player.playSound(player, Sound.UI_BUTTON_CLICK, 1, 1);
+            player.playSound(player, Sound.BLOCK_LAVA_POP, 1, 2);
         } else {
             if(event.getAction().isLeftClick())
                 wandContainer.getPersistent().selectRegion(playerSettings.getVariant());

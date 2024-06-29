@@ -91,7 +91,7 @@ public class RegionPersistent {
             this.previewPos = null;
         }
 
-        if(!this.wandContainer.getInstance(wandVariant).hasEnd()) {
+        if(this.wandContainer.hasInstance(wandVariant) && !this.wandContainer.getInstance(wandVariant).hasEnd()) {
             this.wandContainer.getInstance(wandVariant).clear();
         }
     }
