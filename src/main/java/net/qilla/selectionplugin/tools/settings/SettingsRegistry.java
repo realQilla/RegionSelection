@@ -1,4 +1,4 @@
-package net.qilla.selectionplugin.regionselection.settings;
+package net.qilla.selectionplugin.tools.settings;
 
 import org.bukkit.entity.Player;
 

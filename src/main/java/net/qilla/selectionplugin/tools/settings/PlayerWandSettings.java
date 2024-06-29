@@ -1,6 +1,6 @@
-package net.qilla.selectionplugin.regionselection.settings;
+package net.qilla.selectionplugin.tools.settings;
 
-import net.qilla.selectionplugin.regionselection.wand.WandVariant;
+import net.qilla.selectionplugin.tools.regionselection.WandVariant;
 
 public class PlayerWandSettings {
 

@@ -1,9 +1,9 @@
 package net.qilla.selectionplugin;
 
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.qilla.selectionplugin.regionselection.settings.PlayerWandSettings;
-import net.qilla.selectionplugin.regionselection.wand.WandContainer;
-import net.qilla.selectionplugin.regionselection.wand.WandVariant;
+import net.qilla.selectionplugin.tools.settings.PlayerWandSettings;
+import net.qilla.selectionplugin.tools.regionselection.WandContainer;
+import net.qilla.selectionplugin.tools.regionselection.WandVariant;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -47,7 +47,7 @@ public class SelectListener implements Listener {
 
             WandVariant wandVariant = list.get(selected);
             playerSettings.setVariant(wandVariant);
-            player.sendActionBar(MiniMessage.miniMessage().deserialize("<green>Wand variant set to <#" + wandVariant.getHex() + "><bold>" + wandVariant + "</#" + wandVariant.getHex() + ">"));
+            player.sendActionBar(MiniMessage.miniMessage().deserialize("<yellow>Wand variant set to <#" + wandVariant.getHex() + "><bold>" + wandVariant + "</#" + wandVariant.getHex() + "></yellow>"));
             player.playSound(player, Sound.UI_BUTTON_CLICK, 1, 1);
         } else {
             if(event.getAction().isLeftClick())
@@ -77,7 +77,7 @@ public class SelectListener implements Listener {
         final WandContainer wandContainer = this.plugin.getRegionRegistry().getContainer(player);
 
         if(item != null && item.getType() == Material.BREEZE_ROD) wandContainer.getPersistent().update();
-        else if(this.plugin.getRegionRegistry().hasContainer(player) && wandContainer.getPersistent().activePreview())
+        else if(this.plugin.getRegionRegistry().hasContainer(player) && wandContainer.getPersistent().isPreviewActive())
             wandContainer.getPersistent().unselect();
     }
 

@@ -9,7 +9,7 @@ import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.qilla.selectionplugin.SelectionPlugin;
-import net.qilla.selectionplugin.regionselection.wand.WandVariant;
+import net.qilla.selectionplugin.tools.regionselection.WandVariant;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 

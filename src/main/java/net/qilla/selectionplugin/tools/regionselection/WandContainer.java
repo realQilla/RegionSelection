@@ -1,8 +1,7 @@
-package net.qilla.selectionplugin.regionselection.wand;
+package net.qilla.selectionplugin.tools.regionselection;
 
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumMap;
 import java.util.Map;

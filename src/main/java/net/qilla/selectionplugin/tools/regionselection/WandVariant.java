@@ -1,4 +1,4 @@
-package net.qilla.selectionplugin.regionselection.wand;
+package net.qilla.selectionplugin.tools.regionselection;
 
 import org.bukkit.Color;
 import org.bukkit.Material;
@@ -8,7 +8,7 @@ public enum WandVariant {
     LIGHT_GRAY(Material.LIGHT_GRAY_WOOL, "AAAAAA"),
     GRAY(Material.GRAY_WOOL, "555555"),
     BLACK(Material.BLACK_WOOL, "000000"),
-    BROWN(Material.BROWN_WOOL, "cd9575"),
+    BROWN(Material.BROWN_WOOL, "965A3E"),
     RED(Material.RED_WOOL, "FF5555"),
     ORANGE(Material.ORANGE_WOOL, "FFAA00"),
     YELLOW(Material.YELLOW_WOOL, "FFFF55"),

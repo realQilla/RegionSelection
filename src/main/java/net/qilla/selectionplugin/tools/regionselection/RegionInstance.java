@@ -1,6 +1,10 @@
-package net.qilla.selectionplugin.regionselection.wand;
+package net.qilla.selectionplugin.tools.regionselection;
 
+import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
+import net.minecraft.server.level.ServerPlayer;
 import org.bukkit.block.Block;
+import org.bukkit.craftbukkit.entity.CraftBlockDisplay;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.BlockDisplay;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
@@ -11,7 +15,7 @@ public class RegionInstance {
 
     private final WandContainer wandStorage;
     private final WandVariant wandVariant;
-    private final List<BlockDisplay> regionCuboid = new ArrayList<>();
+    private final List<CraftBlockDisplay> regionCuboid = new ArrayList<>();
     private Block originPos;
     private Block endPos;
 
@@ -21,7 +25,10 @@ public class RegionInstance {
     }
 
     protected void clear() {
-        this.regionCuboid.forEach(Entity::remove);
+        ServerPlayer nmsPlayer = ((CraftPlayer)wandStorage.getPlayer()).getHandle();
+        this.regionCuboid.forEach(entity -> {
+            nmsPlayer.connection.sendPacket(new ClientboundRemoveEntitiesPacket(entity.getEntityId()));
+        });
         this.wandStorage.removeInstance(wandVariant);
     }
 
@@ -35,7 +42,7 @@ public class RegionInstance {
         this.wandStorage.getPersistent().updateLoc(this.regionCuboid, this.originPos, this.endPos);
     }
 
-    protected List<BlockDisplay> getCuboid() {
+    protected List<CraftBlockDisplay> getCuboid() {
         return regionCuboid;
     }
 

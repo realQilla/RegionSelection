@@ -1,4 +1,4 @@
-package net.qilla.selectionplugin.regionselection.wand;
+package net.qilla.selectionplugin.tools.regionselection;
 
 import org.bukkit.entity.Player;
 
