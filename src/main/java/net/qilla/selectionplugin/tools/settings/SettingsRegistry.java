@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.UUID;
 
 public class SettingsRegistry {
-    private final Map<UUID, PlayerWandSettings> settingRegistry = new HashMap<>();
+    private final Map<UUID, WandSettings> settingRegistry = new HashMap<>();
     private static SettingsRegistry instance = null;
 
     private SettingsRegistry() {
@@ -18,11 +18,15 @@ public class SettingsRegistry {
         return instance;
     }
 
-    public PlayerWandSettings getPlayer(Player player) {
-        return settingRegistry.computeIfAbsent(player.getUniqueId(), k -> new PlayerWandSettings());
+    public WandSettings getPlayer(Player player) {
+        return settingRegistry.computeIfAbsent(player.getUniqueId(), k -> new WandSettings());
     }
 
     public void createPlayer(Player player) {
-        this.settingRegistry.put(player.getUniqueId(), new PlayerWandSettings());
+        this.settingRegistry.put(player.getUniqueId(), new WandSettings());
+    }
+
+    public void removePlayer(Player player) {
+        this.settingRegistry.remove(player.getUniqueId());
     }
 }

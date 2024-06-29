@@ -6,16 +6,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class RegionRegistry {
+public final class WandContainerRegistry {
 
-    private static RegionRegistry instance;
+    private static WandContainerRegistry instance;
     private final Map<UUID, WandContainer> playerContainers = new HashMap<>();
 
-    private RegionRegistry() {
+    private WandContainerRegistry() {
     }
 
-    public static RegionRegistry getContainer() {
-        if(instance == null) instance = new RegionRegistry();
+    public static WandContainerRegistry getContainer() {
+        if(instance == null) instance = new WandContainerRegistry();
         return instance;
     }
 

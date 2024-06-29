@@ -5,8 +5,9 @@ import io.papermc.paper.plugin.lifecycle.event.LifecycleEventManager;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import net.qilla.selectionplugin.command.ToolsCom;
 import net.qilla.selectionplugin.command.WandCom;
+import net.qilla.selectionplugin.gui.GUIListener;
 import net.qilla.selectionplugin.tools.settings.SettingsRegistry;
-import net.qilla.selectionplugin.tools.regionselection.RegionRegistry;
+import net.qilla.selectionplugin.tools.regionselection.WandContainerRegistry;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -15,11 +16,12 @@ public final class SelectionPlugin extends JavaPlugin {
 
     private final LifecycleEventManager<Plugin> manager = this.getLifecycleManager();
     private final SettingsRegistry settingsRegistry = SettingsRegistry.getInstance();
-    private final RegionRegistry regionRegistry = RegionRegistry.getContainer();
+    private final WandContainerRegistry wandContainerRegistry = WandContainerRegistry.getContainer();
 
     @Override
     public void onEnable() {
         getServer().getPluginManager().registerEvents(new SelectListener(this), this);
+        getServer().getPluginManager().registerEvents(new GUIListener(), this);
         registerCommands();
 
         Bukkit.getOnlinePlayers().forEach(player -> getSettingsRegistry().createPlayer(player));
@@ -46,7 +48,7 @@ public final class SelectionPlugin extends JavaPlugin {
         return getPlugin(SelectionPlugin.class);
     }
 
-    public RegionRegistry getRegionRegistry() {
-        return this.regionRegistry;
+    public WandContainerRegistry getWandContainerRegistry() {
+        return this.wandContainerRegistry;
     }
 }

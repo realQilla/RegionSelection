@@ -5,60 +5,61 @@ import net.minecraft.server.level.ServerPlayer;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.entity.CraftBlockDisplay;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
-import org.bukkit.entity.BlockDisplay;
-import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public class RegionInstance {
+public final class RegionInstance {
 
-    private final WandContainer wandStorage;
+    private final WandContainer wandContainer;
     private final WandVariant wandVariant;
     private final List<CraftBlockDisplay> regionCuboid = new ArrayList<>();
     private Block originPos;
     private Block endPos;
 
-    protected RegionInstance(@NotNull final WandContainer wandContainer, @NotNull final WandVariant wandVariant) {
-        this.wandStorage = wandContainer;
+    RegionInstance(@NotNull WandContainer wandContainer, @NotNull WandVariant wandVariant) {
+        this.wandContainer = wandContainer;
         this.wandVariant = wandVariant;
     }
 
-    protected void clear() {
-        ServerPlayer nmsPlayer = ((CraftPlayer)wandStorage.getPlayer()).getHandle();
+    void clear() {
+        ServerPlayer nmsPlayer = ((CraftPlayer) wandContainer.getPlayer()).getHandle();
         this.regionCuboid.forEach(entity -> {
             nmsPlayer.connection.sendPacket(new ClientboundRemoveEntitiesPacket(entity.getEntityId()));
         });
-        this.wandStorage.removeInstance(wandVariant);
     }
 
-    protected void regionOrigin(final Block block) {
+    void regionOrigin(Block block) {
         this.originPos = block;
-        this.regionCuboid.addAll(this.wandStorage.getPersistent().createCuboid(this.originPos, this.originPos, this.wandVariant));
+        this.regionCuboid.addAll(this.wandContainer.getRegionPersistent().createCuboid(this.originPos, this.originPos, this.wandVariant));
     }
 
-    protected void regionEnd(final Block endPos) {
+    void regionEnd(Block endPos) {
         this.endPos = endPos;
-        this.wandStorage.getPersistent().updateLoc(this.regionCuboid, this.originPos, this.endPos);
+        this.wandContainer.getRegionPersistent().updateLoc(this.regionCuboid, this.originPos, this.endPos);
     }
 
-    protected List<CraftBlockDisplay> getCuboid() {
+    List<CraftBlockDisplay> getCuboid() {
         return regionCuboid;
     }
 
-    protected Block getOrigin() {
+    public WandVariant getWandVariant() {
+        return wandVariant;
+    }
+
+    public Block getOrigin() {
         return originPos;
     }
 
-    protected Block getEnd() {
+    public Block getEnd() {
         return endPos;
     }
 
-    protected boolean hasOrigin() {
+    public boolean hasOrigin() {
         return originPos != null;
     }
 
-    protected boolean hasEnd() {
+    public boolean hasEnd() {
         return endPos != null;
     }
 }

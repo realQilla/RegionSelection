@@ -20,13 +20,14 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Transformation;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class RegionPersistent {
+public final class RegionPersistent {
 
     private final Plugin plugin = SelectionPlugin.getInstance();
     private final WandContainer wandContainer;
@@ -36,12 +37,12 @@ public class RegionPersistent {
     private Block previewPos;
     private final List<CraftBlockDisplay> previewCuboid = new ArrayList<>();
 
-    protected RegionPersistent(@NotNull final WandContainer wandContainer) {
+    RegionPersistent(@NotNull WandContainer wandContainer) {
         this.wandContainer = wandContainer;
         this.player = wandContainer.getPlayer();
     }
 
-    public void selectRegion(final WandVariant wandVariant) {
+    public void selectRegion(@NotNull WandVariant wandVariant) {
         this.wandVariant = wandVariant;
         if(!this.wandContainer.getInstance(wandVariant).hasOrigin()) {
             this.wandContainer.getInstance(wandVariant).regionOrigin(previewPos);
@@ -92,15 +93,15 @@ public class RegionPersistent {
         }
 
         if(this.wandContainer.hasInstance(wandVariant) && !this.wandContainer.getInstance(wandVariant).hasEnd()) {
-            this.wandContainer.getInstance(wandVariant).clear();
+            this.wandContainer.removeInstance(wandVariant);
         }
     }
 
-    public void clearWand(final WandVariant wandVariant) {
+    public void clearWand(@NotNull final WandVariant wandVariant) {
         this.wandVariant = wandVariant;
-        this.wandContainer.getInstance(wandVariant).clear();
+        this.wandContainer.removeInstance(wandVariant);
+        this.player.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>Region <#" + this.wandVariant.getHex() + "><bold>" + this.wandVariant + "</bold></#" + this.wandVariant.getHex() + "> has been <red><bold>REMOVED</bold></red>!</yellow>"));
         this.player.playSound(this.player, Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1, 1);
-        this.player.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>Region <bold><#" + this.wandVariant.getHex() + ">" + this.wandVariant + "</#" + this.wandVariant.getHex() + "></bold> has been <red><bold>CLEARED</bold></red>!</yellow>"));
     }
 
     private Block scanForward() {
@@ -116,7 +117,7 @@ public class RegionPersistent {
         return selection;
     }
 
-    protected List<CraftBlockDisplay> createCuboid(Block origin, Block end, WandVariant variant) {
+    List<CraftBlockDisplay> createCuboid(@NotNull Block origin, @NotNull Block end, @NotNull WandVariant variant) {
         Level nmsWorld = ((CraftWorld) origin.getWorld()).getHandle();
         CraftServer craftServer = nmsWorld.getCraftServer();
         ServerPlayer nmsPlayer = ((CraftPlayer) player).getHandle();
@@ -156,7 +157,7 @@ public class RegionPersistent {
         return displayList;
     }
 
-    protected void updateLoc(final List<CraftBlockDisplay> displayList, final Block origin, final Block end) {
+    void updateLoc(@Nullable List<CraftBlockDisplay> displayList, @NotNull Block origin, @NotNull Block end) {
         ServerPlayer nmsPlayer = ((CraftPlayer) player).getHandle();
 
         int minX = Math.min(origin.getX(), end.getX());
@@ -170,7 +171,7 @@ public class RegionPersistent {
         int yDist = maxY - minY + 1;
         int zDist = maxZ - minZ + 1;
 
-        for(int i = 0; i < 12; i++) {
+        for(int i = 0; i < displayList.size(); i++) {
             final Vector3f position = getPositions(xDist, yDist, zDist)[i];
             final Vector3f size = getSizes(xDist, yDist, zDist)[i];
             CraftBlockDisplay display = displayList.get(i);

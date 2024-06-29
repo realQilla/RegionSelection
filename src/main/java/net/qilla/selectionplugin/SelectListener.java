@@ -1,21 +1,15 @@
 package net.qilla.selectionplugin;
 
-import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.qilla.selectionplugin.tools.settings.PlayerWandSettings;
+import net.qilla.selectionplugin.tools.regionselection.gui.RegionModification;
+import net.qilla.selectionplugin.tools.settings.WandSettings;
 import net.qilla.selectionplugin.tools.regionselection.WandContainer;
-import net.qilla.selectionplugin.tools.regionselection.WandVariant;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-
-import java.util.Arrays;
-import java.util.List;
-
 
 public class SelectListener implements Listener {
 
@@ -28,57 +22,41 @@ public class SelectListener implements Listener {
     @EventHandler
     private void onPlayerInteract(PlayerInteractEvent event) {
         final Player player = event.getPlayer();
-        final PlayerWandSettings playerSettings = this.plugin.getSettingsRegistry().getPlayer(player);
-        final WandContainer wandContainer = this.plugin.getRegionRegistry().getContainer(player);
+        final WandSettings wandSettings = this.plugin.getSettingsRegistry().getPlayer(player);
+        final WandContainer wandContainer = this.plugin.getWandContainerRegistry().getContainer(player);
 
         if(player.getInventory().getItemInMainHand().getType() != Material.BREEZE_ROD) return;
         if(event.getHand() != EquipmentSlot.HAND) return;
         event.setCancelled(true);
 
-        if(playerSettings.isChangingVariant()) {
-            final List<WandVariant> list = Arrays.asList(WandVariant.values());
-            int selected = list.indexOf(playerSettings.getVariant());
-
-            if(event.getAction().isLeftClick()) {
-                selected = (selected >= list.size() - 1) ? 0 : selected + 1;
-            } else if(event.getAction().isRightClick()) {
-                selected = (selected <= 0) ? list.size() - 1 : selected - 1;
-            }
-
-            WandVariant wandVariant = list.get(selected);
-            playerSettings.setVariant(wandVariant);
-            player.sendActionBar(MiniMessage.miniMessage().deserialize("<yellow>Wand variant set to <#" + wandVariant.getHex() + "><bold>" + wandVariant + "</#" + wandVariant.getHex() + "></yellow>"));
-            player.playSound(player, Sound.BLOCK_LAVA_POP, 1, 2);
-        } else {
-            if(event.getAction().isLeftClick())
-                wandContainer.getPersistent().selectRegion(playerSettings.getVariant());
-             else if(event.getAction().isRightClick())
-                if(wandContainer.hasInstance(playerSettings.getVariant()))
-                    wandContainer.getPersistent().clearWand(playerSettings.getVariant());
-        }
+        if(event.getAction().isLeftClick())
+            wandContainer.getRegionPersistent().selectRegion(wandSettings.getVariant());
+        else if(event.getAction().isRightClick())
+            if(wandContainer.hasInstance(wandSettings.getVariant()))
+                wandContainer.getRegionPersistent().clearWand(wandSettings.getVariant());
     }
 
     @EventHandler
     private void onSwapHand(PlayerSwapHandItemsEvent event) {
         final Player player = event.getPlayer();
         final ItemStack item = player.getInventory().getItemInMainHand();
-        final PlayerWandSettings playerSettings = this.plugin.getSettingsRegistry().getPlayer(player);
+        final WandSettings wandSettings = this.plugin.getSettingsRegistry().getPlayer(player);
+        final WandContainer wandContainer = this.plugin.getWandContainerRegistry().getContainer(player);
 
         if(item.getType() != Material.BREEZE_ROD) return;
         event.setCancelled(true);
-        playerSettings.toggleVariant();
-        player.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>Wand variant selection mode " + (playerSettings.isChangingVariant() ? "<green>ENABLED</green>" : "<red>DISABLED</red>") + "!</yellow>"));
+        new RegionModification(player, wandSettings, wandContainer).openInventory();
     }
 
     @EventHandler
     private void onPlayerHeldItem(PlayerItemHeldEvent event) {
         final Player player = event.getPlayer();
         final ItemStack item = player.getInventory().getItem(event.getNewSlot());
-        final WandContainer wandContainer = this.plugin.getRegionRegistry().getContainer(player);
+        final WandContainer wandContainer = this.plugin.getWandContainerRegistry().getContainer(player);
 
-        if(item != null && item.getType() == Material.BREEZE_ROD) wandContainer.getPersistent().update();
-        else if(this.plugin.getRegionRegistry().hasContainer(player) && wandContainer.getPersistent().isPreviewActive())
-            wandContainer.getPersistent().unselect();
+        if(item != null && item.getType() == Material.BREEZE_ROD) wandContainer.getRegionPersistent().update();
+        else if(this.plugin.getWandContainerRegistry().hasContainer(player) && wandContainer.getRegionPersistent().isPreviewActive())
+            wandContainer.getRegionPersistent().unselect();
     }
 
     @EventHandler
@@ -86,5 +64,12 @@ public class SelectListener implements Listener {
         final Player player = event.getPlayer();
 
         this.plugin.getSettingsRegistry().createPlayer(player);
+    }
+
+    @EventHandler
+    private void onPlayerLeave(PlayerQuitEvent event) {
+        final Player player = event.getPlayer();
+
+        this.plugin.getWandContainerRegistry().removeContainer(player);
     }
 }

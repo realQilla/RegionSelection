@@ -5,7 +5,7 @@ import org.bukkit.Material;
 
 public enum WandVariant {
     WHITE(Material.WHITE_WOOL, "FFFFFF"),
-    LIGHT_GRAY(Material.LIGHT_GRAY_WOOL, "AAAAAA"),
+    SILVER(Material.LIGHT_GRAY_WOOL, "AAAAAA"),
     GRAY(Material.GRAY_WOOL, "555555"),
     BLACK(Material.BLACK_WOOL, "000000"),
     BROWN(Material.BROWN_WOOL, "965A3E"),
@@ -15,7 +15,7 @@ public enum WandVariant {
     LIME(Material.LIME_WOOL, "55FF55"),
     GREEN(Material.GREEN_WOOL, "00AA00"),
     CYAN(Material.CYAN_WOOL, "00AAAA"),
-    LIGHT_BLUE(Material.LIGHT_BLUE_WOOL, "55FFFF"),
+    AQUA(Material.LIGHT_BLUE_WOOL, "55FFFF"),
     BLUE(Material.BLUE_WOOL, "5555FF"),
     PURPLE(Material.PURPLE_WOOL, "AA00AA"),
     MAGENTA(Material.MAGENTA_WOOL, "FF00FF"),

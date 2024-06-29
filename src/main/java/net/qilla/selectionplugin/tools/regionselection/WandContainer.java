@@ -4,40 +4,54 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 
-public class WandContainer {
+public final class WandContainer {
 
     private final Player player;
-    private final RegionPersistent persistent;
-    private final Map<WandVariant, RegionInstance> instances;
+    private final RegionPersistent regionPersistent;
+    private final Map<WandVariant, RegionInstance> regionInstances;
+    private WandVariant activeInstance;
     
-    public WandContainer(final Player player) {
+    public WandContainer(Player player) {
         this.player = player;
-        this.persistent = new RegionPersistent(this);
-        this.instances =  new EnumMap<>(WandVariant.class);
+        this.regionPersistent = new RegionPersistent(this);
+        this.regionInstances =  new EnumMap<>(WandVariant.class);
     }
 
     @NotNull
-    public RegionInstance getInstance(final WandVariant wandVariant) {
-        return this.instances.computeIfAbsent(wandVariant, k -> new RegionInstance(this, wandVariant));
-    }
-
-    public void removeInstance(final WandVariant wandVariant) {
-        this.instances.remove(wandVariant);
-    }
-
-    public boolean hasInstance(final WandVariant wandVariant) {
-        return this.instances.containsKey(wandVariant);
+    public RegionInstance getInstance(WandVariant wandVariant) {
+        this.activeInstance = wandVariant;
+        return this.regionInstances.computeIfAbsent(wandVariant, k -> new RegionInstance(this, wandVariant));
     }
 
     @NotNull
-    public RegionPersistent getPersistent() {
-        return this.persistent;
+    public List<RegionInstance> getInstances() {
+        return this.regionInstances.values().stream().toList();
+    }
+
+    public boolean isInstanceAlive() {
+        return this.regionInstances.containsKey(this.activeInstance);
+    }
+
+    public void removeInstance(WandVariant wandVariant) {
+        if(!this.regionInstances.containsKey(wandVariant)) return;
+        this.regionInstances.get(wandVariant).clear();
+        this.regionInstances.remove(wandVariant);
+    }
+
+    public boolean hasInstance(WandVariant wandVariant) {
+        return this.regionInstances.containsKey(wandVariant);
     }
 
     @NotNull
-    protected Player getPlayer() {
+    public RegionPersistent getRegionPersistent() {
+        return this.regionPersistent;
+    }
+
+    @NotNull
+    Player getPlayer() {
         return this.player;
     }
 }
