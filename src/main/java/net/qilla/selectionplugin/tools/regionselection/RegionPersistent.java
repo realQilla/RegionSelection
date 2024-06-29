@@ -24,6 +24,7 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,6 +52,7 @@ public final class RegionPersistent {
         } else {
             this.wandContainer.getInstance(wandVariant).regionEnd(previewPos);
             this.player.sendMessage(MiniMessage.miniMessage().deserialize("<aqua><bold>POSITION B</bold></aqua> <yellow>Selected @ " + this.previewPos.getX() + ", " + this.previewPos.getY() + ", " + this.previewPos.getZ() + "!</yellow>"));
+            this.player.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>Region <#" + this.wandVariant.getHex() + "><bold>" + wandVariant + "</#" + wandVariant.getHex() +"> size set to " + NumberFormat.getInstance().format(this.wandContainer.getInstance(wandVariant).getSize()) + " blocks!</yellow>" ));
             this.player.playSound(player, Sound.BLOCK_NOTE_BLOCK_BELL, 1, 2);
         }
     }

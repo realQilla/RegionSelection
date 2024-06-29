@@ -62,4 +62,12 @@ public final class RegionInstance {
     public boolean hasEnd() {
         return endPos != null;
     }
+
+    public int getSize() {
+        if(!hasOrigin() || !hasEnd()) return -1;
+        int x = Math.abs(this.originPos.getX() - this.endPos.getX()) + 1;
+        int y = Math.abs(this.originPos.getY() - this.endPos.getY()) + 1;
+        int z = Math.abs(this.originPos.getZ() - this.endPos.getZ()) + 1;
+        return x * y * z;
+    }
 }

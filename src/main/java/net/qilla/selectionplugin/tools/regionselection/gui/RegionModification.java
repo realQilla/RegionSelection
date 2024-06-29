@@ -15,6 +15,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.jetbrains.annotations.NotNull;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -149,6 +150,7 @@ public final class RegionModification extends InventoryGUI {
                     lore.add(MiniMessage.miniMessage().deserialize(""));
                     lore.add(MiniMessage.miniMessage().deserialize("<!italic><yellow><gold><bold>POSITION A</bold></gold> @ " + regionInstance.getOrigin().getX() + ", " + regionInstance.getOrigin().getX() + ", " + regionInstance.getOrigin().getX() + "</yellow>"));
                     lore.add(MiniMessage.miniMessage().deserialize("<!italic><yellow><aqua><bold>POSITION B</bold></aqua> @ " + regionInstance.getEnd().getX() + ", " + regionInstance.getEnd().getX() + ", " + regionInstance.getEnd().getX() + "</yellow>"));
+                    lore.add(MiniMessage.miniMessage().deserialize("<!italic><yellow><green><bold>TOTAL SIZE</bold></green> " + NumberFormat.getInstance().format(regionInstance.getSize()) +"</yellow>"));
                     lore.add(MiniMessage.miniMessage().deserialize(""));
                     lore.add(MiniMessage.miniMessage().deserialize("<!italic><gray><yellow><bold>LEFT</bold></yellow> to <green><bold>SELECT</bold></green> this region</gray>"));
                     lore.add(MiniMessage.miniMessage().deserialize("<!italic><gray><yellow><bold>RIGHT</bold></yellow> to <red><bold>DELETE</bold></red> this region</gray>"));
@@ -157,6 +159,13 @@ public final class RegionModification extends InventoryGUI {
                 });
             });
         }
+        getValidSlots().forEach(slot -> {
+            if(getInventory().getItem(slot) == null) setItem(Material.BLACK_STAINED_GLASS_PANE, slot, item -> {
+                item.editMeta(meta -> {
+                    meta.displayName(MiniMessage.miniMessage().deserialize("<!italic><gray>Empty Slot</gray>"));
+                });
+            });
+        });
     }
 
     public static List<Integer> getValidSlots() {
