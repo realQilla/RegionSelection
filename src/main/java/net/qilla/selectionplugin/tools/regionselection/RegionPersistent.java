@@ -66,16 +66,17 @@ public final class RegionPersistent {
 
         this.updateTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
             final Block forwardScan = scanForward();
-            if(previewPos != forwardScan) {
+            if(!previewPos.equals(forwardScan)) {
                 this.previewPos = scanForward();
                 this.previewCuboid.forEach(display -> {
                     display.teleport(previewPos.getLocation());
                     nmsPlayer.connection.sendPacket(new ClientboundTeleportEntityPacket(display.getHandle()));
                 });
-            }
 
-            if(this.container.hasInstance(this.settings.getVariant()) && !this.container.getInstance(this.settings.getVariant()).hasEnd()) {
-                updateLoc(this.container.getInstance(this.settings.getVariant()).getCuboid(), this.container.getInstance(this.settings.getVariant()).getOrigin(), previewPos);
+
+                if(this.container.hasInstance(this.settings.getVariant()) && !this.container.getInstance(this.settings.getVariant()).hasEnd()) {
+                    updateLoc(this.container.getInstance(this.settings.getVariant()).getCuboid(), this.container.getInstance(this.settings.getVariant()).getOrigin(), previewPos);
+                }
             }
             player.sendActionBar(MiniMessage.miniMessage().deserialize("<yellow>Current region is <#" + this.settings.getVariant().getHex() + "><bold>" + this.settings.getVariant() + "</#" + this.settings.getVariant().getHex() + "></yellow>"));
         }, 0, 1);
