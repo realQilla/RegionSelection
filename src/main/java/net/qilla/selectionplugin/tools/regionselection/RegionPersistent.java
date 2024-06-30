@@ -31,34 +31,35 @@ import java.util.List;
 public final class RegionPersistent {
 
     private final Plugin plugin = SelectionPlugin.getInstance();
-    private final WandContainer wandContainer;
     private final Player player;
-    private WandVariant wandVariant;
+    private final WandContainer container;
+    private final WandSettings settings;
     private BukkitTask updateTask;
     private Block previewPos;
     private final List<CraftBlockDisplay> previewCuboid = new ArrayList<>();
 
-    RegionPersistent(@NotNull WandContainer wandContainer) {
-        this.wandContainer = wandContainer;
-        this.player = wandContainer.getPlayer();
+    RegionPersistent(@NotNull WandContainer container) {
+        this.player = container.getPlayer();
+        this.container = container;
+        this.settings = this.container.getSettings();
     }
 
-    public void selectRegion(@NotNull WandVariant wandVariant) {
-        this.wandVariant = wandVariant;
-        if(!this.wandContainer.getInstance(wandVariant).hasOrigin()) {
-            this.wandContainer.getInstance(wandVariant).regionOrigin(previewPos);
+    public void selectRegion() {
+        if(!this.container.getInstance(this.settings.getVariant()).hasOrigin()) {
+            this.container.getInstance(this.settings.getVariant()).regionOrigin(previewPos);
             this.player.playSound(this.player, Sound.BLOCK_NOTE_BLOCK_BELL, 1, 0);
             this.player.sendMessage(MiniMessage.miniMessage().deserialize("<gold><bold>POSITION A</bold></gold> <yellow>Selected @ " + this.previewPos.getX() + ", " + this.previewPos.getY() + ", " + this.previewPos.getZ() + "!</yellow>"));
         } else {
-            this.wandContainer.getInstance(wandVariant).regionEnd(previewPos);
+            this.container.getInstance(this.settings.getVariant()).regionEnd(previewPos);
             this.player.sendMessage(MiniMessage.miniMessage().deserialize("<aqua><bold>POSITION B</bold></aqua> <yellow>Selected @ " + this.previewPos.getX() + ", " + this.previewPos.getY() + ", " + this.previewPos.getZ() + "!</yellow>"));
-            this.player.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>Region <#" + this.wandVariant.getHex() + "><bold>" + wandVariant + "</#" + wandVariant.getHex() +"> size set to " + NumberFormat.getInstance().format(this.wandContainer.getInstance(wandVariant).getSize()) + " blocks!</yellow>" ));
+            this.player.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>Region <#" + this.settings.getVariant().getHex() + "><bold>" + this.settings.getVariant() + "</#" + this.settings.getVariant().getHex() +"> size set to " + NumberFormat.getInstance().format(this.container.getInstance(this.settings.getVariant()).getRegionSize()) + " blocks!</yellow>" ));
             this.player.playSound(player, Sound.BLOCK_NOTE_BLOCK_BELL, 1, 2);
         }
     }
 
     public void update() {
         ServerPlayer nmsPlayer = ((CraftPlayer) player).getHandle();
+
         if(!this.previewCuboid.isEmpty()) return;
         this.previewPos = scanForward();
         this.previewCuboid.addAll(createCuboid(this.previewPos, this.previewPos, WandVariant.WHITE));
@@ -73,9 +74,10 @@ public final class RegionPersistent {
                 });
             }
 
-            if(this.wandContainer.hasInstance(this.wandVariant) && !this.wandContainer.getInstance(wandVariant).hasEnd()) {
-                updateLoc(this.wandContainer.getInstance(wandVariant).getCuboid(), this.wandContainer.getInstance(wandVariant).getOrigin(), previewPos);
+            if(this.container.hasInstance(this.settings.getVariant()) && !this.container.getInstance(this.settings.getVariant()).hasEnd()) {
+                updateLoc(this.container.getInstance(this.settings.getVariant()).getCuboid(), this.container.getInstance(this.settings.getVariant()).getOrigin(), previewPos);
             }
+            player.sendActionBar(MiniMessage.miniMessage().deserialize("<yellow>Current region is <#" + this.settings.getVariant().getHex() + "><bold>" + this.settings.getVariant() + "</#" + this.settings.getVariant().getHex() + "></yellow>"));
         }, 0, 1);
     }
 
@@ -85,6 +87,7 @@ public final class RegionPersistent {
 
     public void unselect() {
         ServerPlayer nmsPlayer = ((CraftPlayer) player).getHandle();
+
         if(!this.previewCuboid.isEmpty()) {
             this.updateTask.cancel();
             this.previewCuboid.forEach(entity -> {
@@ -94,15 +97,14 @@ public final class RegionPersistent {
             this.previewPos = null;
         }
 
-        if(this.wandContainer.hasInstance(wandVariant) && !this.wandContainer.getInstance(wandVariant).hasEnd()) {
-            this.wandContainer.removeInstance(wandVariant);
+        if(this.container.hasInstance(this.settings.getVariant()) && !this.container.getInstance(this.settings.getVariant()).hasEnd()) {
+            this.container.removeInstance(this.settings.getVariant());
         }
     }
 
-    public void clearWand(@NotNull final WandVariant wandVariant) {
-        this.wandVariant = wandVariant;
-        this.wandContainer.removeInstance(wandVariant);
-        this.player.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>Region <#" + this.wandVariant.getHex() + "><bold>" + this.wandVariant + "</bold></#" + this.wandVariant.getHex() + "> has been <red><bold>REMOVED</bold></red>!</yellow>"));
+    public void clearWand() {
+        this.container.removeInstance(this.settings.getVariant());
+        this.player.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>Region <#" + this.settings.getVariant().getHex() + "><bold>" + this.settings.getVariant() + "</bold></#" + this.settings.getVariant().getHex() + "> has been <red><bold>REMOVED</bold></red>!</yellow>"));
         this.player.playSound(this.player, Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1, 1);
     }
 
@@ -110,7 +112,7 @@ public final class RegionPersistent {
         final Location eyeLoc = this.player.getEyeLocation();
         Block selection = null;
 
-        for(int i = 1; i <= 5; i++) {
+        for(int i = 1; i <= settings.wandReach().getValue(); i++) {
             selection = eyeLoc.clone().add(eyeLoc.getDirection().multiply(i)).getBlock();
             if(selection.getType() != Material.AIR) {
                 return selection;

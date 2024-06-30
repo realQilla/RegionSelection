@@ -10,44 +10,45 @@ import java.util.Map;
 public final class WandContainer {
 
     private final Player player;
-    private final RegionPersistent regionPersistent;
-    private final Map<WandVariant, RegionInstance> regionInstances;
-    private WandVariant activeInstance;
+    private final WandSettings settings;
+    private final RegionPersistent persistent;
+    private final Map<WandVariant, RegionInstance> instances;
     
     public WandContainer(Player player) {
         this.player = player;
-        this.regionPersistent = new RegionPersistent(this);
-        this.regionInstances =  new EnumMap<>(WandVariant.class);
+        this.settings = new WandSettings();
+        this.persistent = new RegionPersistent(this);
+        this.instances =  new EnumMap<>(WandVariant.class);
+    }
+
+    @NotNull
+    public RegionPersistent getPersistent() {
+        return this.persistent;
     }
 
     @NotNull
     public RegionInstance getInstance(WandVariant wandVariant) {
-        this.activeInstance = wandVariant;
-        return this.regionInstances.computeIfAbsent(wandVariant, k -> new RegionInstance(this, wandVariant));
+        return this.instances.computeIfAbsent(wandVariant, k -> new RegionInstance(this, wandVariant));
     }
 
     @NotNull
     public List<RegionInstance> getInstances() {
-        return this.regionInstances.values().stream().toList();
-    }
-
-    public boolean isInstanceAlive() {
-        return this.regionInstances.containsKey(this.activeInstance);
-    }
-
-    public void removeInstance(WandVariant wandVariant) {
-        if(!this.regionInstances.containsKey(wandVariant)) return;
-        this.regionInstances.get(wandVariant).clear();
-        this.regionInstances.remove(wandVariant);
-    }
-
-    public boolean hasInstance(WandVariant wandVariant) {
-        return this.regionInstances.containsKey(wandVariant);
+        return this.instances.values().stream().toList();
     }
 
     @NotNull
-    public RegionPersistent getRegionPersistent() {
-        return this.regionPersistent;
+    public WandSettings getSettings() {
+        return this.settings;
+    }
+
+    public void removeInstance(WandVariant wandVariant) {
+        if(!this.instances.containsKey(wandVariant)) return;
+        this.instances.get(wandVariant).clear();
+        this.instances.remove(wandVariant);
+    }
+
+    public boolean hasInstance(WandVariant wandVariant) {
+        return this.instances.containsKey(wandVariant);
     }
 
     @NotNull

@@ -7,7 +7,7 @@ import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import org.bukkit.entity.Player;
 
-public class ToolsCom {
+public final class ToolsCom {
 
     private final Commands commands;
 

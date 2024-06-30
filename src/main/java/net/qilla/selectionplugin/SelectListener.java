@@ -1,7 +1,7 @@
 package net.qilla.selectionplugin;
 
 import net.qilla.selectionplugin.tools.regionselection.gui.RegionModification;
-import net.qilla.selectionplugin.tools.settings.WandSettings;
+import net.qilla.selectionplugin.tools.regionselection.WandSettings;
 import net.qilla.selectionplugin.tools.regionselection.WandContainer;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -11,7 +11,7 @@ import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
-public class SelectListener implements Listener {
+public final class SelectListener implements Listener {
 
     private final SelectionPlugin plugin;
 
@@ -22,26 +22,26 @@ public class SelectListener implements Listener {
     @EventHandler
     private void onPlayerInteract(PlayerInteractEvent event) {
         final Player player = event.getPlayer();
-        final WandSettings wandSettings = this.plugin.getSettingsRegistry().getPlayer(player);
         final WandContainer wandContainer = this.plugin.getWandContainerRegistry().getContainer(player);
+        final WandSettings wandSettings = wandContainer.getSettings();
 
         if(player.getInventory().getItemInMainHand().getType() != Material.BREEZE_ROD) return;
         if(event.getHand() != EquipmentSlot.HAND) return;
         event.setCancelled(true);
 
         if(event.getAction().isLeftClick())
-            wandContainer.getRegionPersistent().selectRegion(wandSettings.getVariant());
+            wandContainer.getPersistent().selectRegion();
         else if(event.getAction().isRightClick())
             if(wandContainer.hasInstance(wandSettings.getVariant()))
-                wandContainer.getRegionPersistent().clearWand(wandSettings.getVariant());
+                wandContainer.getPersistent().clearWand();
     }
 
     @EventHandler
     private void onSwapHand(PlayerSwapHandItemsEvent event) {
         final Player player = event.getPlayer();
-        final ItemStack item = player.getInventory().getItemInMainHand();
-        final WandSettings wandSettings = this.plugin.getSettingsRegistry().getPlayer(player);
         final WandContainer wandContainer = this.plugin.getWandContainerRegistry().getContainer(player);
+        final WandSettings wandSettings = wandContainer.getSettings();
+        final ItemStack item = player.getInventory().getItemInMainHand();
 
         if(item.getType() != Material.BREEZE_ROD) return;
         event.setCancelled(true);
@@ -51,25 +51,11 @@ public class SelectListener implements Listener {
     @EventHandler
     private void onPlayerHeldItem(PlayerItemHeldEvent event) {
         final Player player = event.getPlayer();
-        final ItemStack item = player.getInventory().getItem(event.getNewSlot());
         final WandContainer wandContainer = this.plugin.getWandContainerRegistry().getContainer(player);
+        final ItemStack item = player.getInventory().getItem(event.getNewSlot());
 
-        if(item != null && item.getType() == Material.BREEZE_ROD) wandContainer.getRegionPersistent().update();
-        else if(this.plugin.getWandContainerRegistry().hasContainer(player) && wandContainer.getRegionPersistent().isPreviewActive())
-            wandContainer.getRegionPersistent().unselect();
-    }
-
-    @EventHandler
-    private void onPlayerJoin(PlayerJoinEvent event) {
-        final Player player = event.getPlayer();
-
-        this.plugin.getSettingsRegistry().createPlayer(player);
-    }
-
-    @EventHandler
-    private void onPlayerLeave(PlayerQuitEvent event) {
-        final Player player = event.getPlayer();
-
-        this.plugin.getWandContainerRegistry().removeContainer(player);
+        if(item != null && item.getType() == Material.BREEZE_ROD) wandContainer.getPersistent().update();
+        else if(this.plugin.getWandContainerRegistry().hasContainer(player) && wandContainer.getPersistent().isPreviewActive())
+            wandContainer.getPersistent().unselect();
     }
 }

@@ -15,7 +15,7 @@ import org.bukkit.entity.Player;
 
 import java.util.List;
 
-public class WandCom {
+public final class WandCom {
 
     private final Commands commands;
     private final SelectionPlugin plugin;
@@ -71,8 +71,8 @@ public class WandCom {
             return Command.SINGLE_SUCCESS;
         }
 
-        this.plugin.getSettingsRegistry().getPlayer(player).setVariant(variant);
-        player.sendMessage(MiniMessage.miniMessage().deserialize("<green>Wand Variant set to <#" + variant.getHex() + ">" + variant + "</#" + variant.getHex() +">!</green>"));
+        this.plugin.getWandContainerRegistry().getContainer(player).getSettings().setVariant(variant);
+        player.sendMessage(MiniMessage.miniMessage().deserialize("<green>Wand Variant set to <#" + variant.getHex() + "><bold>" + variant + "</bold></#" + variant.getHex() +">!</green>"));
         return Command.SINGLE_SUCCESS;
     }
 }
