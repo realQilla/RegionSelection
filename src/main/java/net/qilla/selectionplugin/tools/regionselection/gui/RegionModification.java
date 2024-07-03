@@ -3,7 +3,7 @@ package net.qilla.selectionplugin.tools.regionselection.gui;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.qilla.selectionplugin.gui.InventoryGUI;
-import net.qilla.selectionplugin.tools.regionselection.RegionInstance;
+import net.qilla.selectionplugin.tools.regionselection.RegionShard;
 import net.qilla.selectionplugin.tools.regionselection.WandContainer;
 import net.qilla.selectionplugin.tools.regionselection.WandVariant;
 import net.qilla.selectionplugin.tools.regionselection.WandSettings;
@@ -89,13 +89,13 @@ public final class RegionModification extends InventoryGUI {
                 break;
             }
             case 53: {
-                if(this.container.getInstances().isEmpty()) {
+                if(this.container.getShards().isEmpty()) {
                     player.sendMessage(MiniMessage.miniMessage().deserialize("<red>There are no existing regions!</red>"));
                     player.playSound(player, Sound.ENTITY_VILLAGER_NO, 1, 1);
                     break;
                 }
-                this.container.getInstances().forEach(instance -> {
-                    this.container.removeInstance(instance.getVariant());
+                this.container.getShards().forEach(instance -> {
+                    this.container.removeShard(instance.getVariant());
                 });
                 loadRegionSlots();
                 player.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>All regions have been <red><bold>REMOVED</bold></red>!<yellow>"));
@@ -121,7 +121,7 @@ public final class RegionModification extends InventoryGUI {
                     }
                     case RIGHT: {
                         this.variantMap.remove(slot);
-                        this.container.removeInstance(wandVariant);
+                        this.container.removeShard(wandVariant);
                         removeItem(getValidSlots());
                         loadRegionSlots();
                         this.player.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>Region" + " <#" + wandVariant.getHex() + "><bold>" + wandVariant + "</#" + wandVariant.getHex() + "> has been <red><bold>REMOVED</bold></red>!</yellow>"));
@@ -129,7 +129,7 @@ public final class RegionModification extends InventoryGUI {
                         break;
                     }
                     case ClickType.MIDDLE: {
-                        this.player.teleport(this.container.getInstance(wandVariant).getOrigin().getLocation());
+                        this.player.teleport(this.container.getShard(wandVariant).getRegion().getOrigin().getLocation());
                         this.player.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>Teleported to region" + " <#" + wandVariant.getHex() + "><bold>" + wandVariant + "</#" + wandVariant.getHex() + ">!</yellow>"));
                         this.player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, 1, 2);
                     }
@@ -166,20 +166,19 @@ public final class RegionModification extends InventoryGUI {
     }
 
     private void loadRegionSlots() {
-        List<RegionInstance> regionInstances = container.getInstances();
+        List<RegionShard> regionShards = container.getShards();
         List<Integer> validSlots = new ArrayList<>(getValidSlots());
-        for(RegionInstance regionInstance : regionInstances) {
-            if(!regionInstance.hasEnd()) continue;
+        for(RegionShard regionShard : regionShards) {
             int validSlot = validSlots.removeFirst();
-            this.variantMap.put(validSlot, regionInstance.getVariant());
-            setItem(regionInstance.getVariant().getMaterial(), validSlot, item -> {
+            this.variantMap.put(validSlot, regionShard.getVariant());
+            setItem(regionShard.getVariant().getMaterial(), validSlot, item -> {
                 item.editMeta(meta -> {
-                    meta.displayName(MiniMessage.miniMessage().deserialize("<!italic><yellow>Region <#" + regionInstance.getVariant().getHex() + "><bold>" + regionInstance.getVariant() + "</#" + regionInstance.getVariant().getHex() + "></yellow>"));
+                    meta.displayName(MiniMessage.miniMessage().deserialize("<!italic><yellow>Region <#" + regionShard.getVariant().getHex() + "><bold>" + regionShard.getVariant() + "</#" + regionShard.getVariant().getHex() + "></yellow>"));
                     List<Component> lore = new ArrayList<>();
                     lore.add(MiniMessage.miniMessage().deserialize(""));
-                    lore.add(MiniMessage.miniMessage().deserialize("<!italic><yellow><gold><bold>POSITION A</bold></gold> @ " + regionInstance.getOrigin().getX() + ", " + regionInstance.getOrigin().getX() + ", " + regionInstance.getOrigin().getX() + "</yellow>"));
-                    lore.add(MiniMessage.miniMessage().deserialize("<!italic><yellow><aqua><bold>POSITION B</bold></aqua> @ " + regionInstance.getEnd().getX() + ", " + regionInstance.getEnd().getX() + ", " + regionInstance.getEnd().getX() + "</yellow>"));
-                    lore.add(MiniMessage.miniMessage().deserialize("<!italic><yellow><green><bold>TOTAL SIZE</bold></green> " + NumberFormat.getInstance().format(regionInstance.getRegionSize()) + "</yellow>"));
+                    lore.add(MiniMessage.miniMessage().deserialize("<!italic><yellow><gold><bold>POSITION A</bold></gold> @ " + regionShard.getRegion().getOrigin().getX() + ", " + regionShard.getRegion().getOrigin().getY() + ", " + regionShard.getRegion().getOrigin().getZ() + "</yellow>"));
+                    lore.add(MiniMessage.miniMessage().deserialize("<!italic><yellow><aqua><bold>POSITION B</bold></aqua> @ " + regionShard.getRegion().getEnd().getX() + ", " + regionShard.getRegion().getEnd().getY() + ", " + regionShard.getRegion().getEnd().getZ() + "</yellow>"));
+                    lore.add(MiniMessage.miniMessage().deserialize("<!italic><yellow><green><bold>TOTAL SIZE</bold></green> " + NumberFormat.getInstance().format(regionShard.getRegion().getSize()) + "</yellow>"));
                     lore.add(MiniMessage.miniMessage().deserialize(""));
                     lore.add(MiniMessage.miniMessage().deserialize("<!italic><gray><yellow><bold>LEFT</bold></yellow> to <green><bold>SELECT</bold></green> this region</gray>"));
                     lore.add(MiniMessage.miniMessage().deserialize("<!italic><gray><yellow><bold>RIGHT</bold></yellow> to <red><bold>DELETE</bold></red> this region</gray>"));

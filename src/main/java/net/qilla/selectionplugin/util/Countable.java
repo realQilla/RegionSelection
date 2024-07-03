@@ -1,4 +1,4 @@
-package net.qilla.selectionplugin.utils;
+package net.qilla.selectionplugin.util;
 
 public final class Countable {
 

@@ -1,6 +1,6 @@
 package net.qilla.selectionplugin.tools.regionselection;
 
-import net.qilla.selectionplugin.utils.Countable;
+import net.qilla.selectionplugin.util.Countable;
 
 import java.util.Arrays;
 import java.util.List;
@@ -8,7 +8,7 @@ import java.util.List;
 public final class WandSettings {
 
     private WandVariant variant = WandVariant.WHITE;
-    private Countable wandReach = new Countable(5,1, 256);
+    private Countable wandReach = new Countable(5,1, 128);
 
     WandSettings() {
     }

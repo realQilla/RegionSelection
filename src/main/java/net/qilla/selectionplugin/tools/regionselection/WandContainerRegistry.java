@@ -28,6 +28,6 @@ public final class WandContainerRegistry {
     }
 
     public boolean hasContainer(final Player player) {
-        return playerContainers.containsKey(player.getUniqueId());
+        return this.playerContainers.containsKey(player.getUniqueId());
     }
 }

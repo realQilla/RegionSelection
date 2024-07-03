@@ -2,38 +2,34 @@ package net.qilla.selectionplugin.tools.regionselection;
 
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public final class WandContainer {
 
     private final Player player;
     private final WandSettings settings;
-    private final RegionPersistent persistent;
-    private final Map<WandVariant, RegionInstance> instances;
-    
+    private final RegionCore core;
+    private final Map<WandVariant, RegionShard> regionShards;
+
     public WandContainer(Player player) {
         this.player = player;
         this.settings = new WandSettings();
-        this.persistent = new RegionPersistent(this);
-        this.instances =  new EnumMap<>(WandVariant.class);
+        this.core = new RegionCore(this);
+        this.regionShards = new EnumMap<>(WandVariant.class);
+    }
+
+    public void setShard(@NotNull RegionShard regionShard) {
+        this.regionShards.put(regionShard.getVariant(), regionShard);
     }
 
     @NotNull
-    public RegionPersistent getPersistent() {
-        return this.persistent;
-    }
-
-    @NotNull
-    public RegionInstance getInstance(WandVariant wandVariant) {
-        return this.instances.computeIfAbsent(wandVariant, k -> new RegionInstance(this, wandVariant));
-    }
-
-    @NotNull
-    public List<RegionInstance> getInstances() {
-        return this.instances.values().stream().toList();
+    Player getPlayer() {
+        return this.player;
     }
 
     @NotNull
@@ -41,18 +37,30 @@ public final class WandContainer {
         return this.settings;
     }
 
-    public void removeInstance(WandVariant wandVariant) {
-        if(!this.instances.containsKey(wandVariant)) return;
-        this.instances.get(wandVariant).clear();
-        this.instances.remove(wandVariant);
+    @NotNull
+    public RegionCore getCore() {
+        return this.core;
     }
 
-    public boolean hasInstance(WandVariant wandVariant) {
-        return this.instances.containsKey(wandVariant);
+    @Nullable
+    public RegionShard getShard(@NotNull WandVariant wandVariant) {
+        return this.regionShards.get(wandVariant);
     }
 
     @NotNull
-    Player getPlayer() {
-        return this.player;
+    public List<RegionShard> getShards() {
+        return this.regionShards.values().stream().toList();
+    }
+
+
+    public void removeShard(@NotNull WandVariant wandVariant) {
+        if(!this.regionShards.containsKey(wandVariant)) return;
+
+        this.regionShards.get(wandVariant).clearOutline();
+        this.regionShards.remove(wandVariant);
+    }
+
+    public boolean hasShard(@NotNull WandVariant wandVariant) {
+        return this.regionShards.containsKey(wandVariant);
     }
 }

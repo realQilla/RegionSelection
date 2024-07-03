@@ -1,5 +1,6 @@
 package net.qilla.selectionplugin;
 
+import net.qilla.selectionplugin.tools.regionselection.RegionCore;
 import net.qilla.selectionplugin.tools.regionselection.gui.RegionModification;
 import net.qilla.selectionplugin.tools.regionselection.WandSettings;
 import net.qilla.selectionplugin.tools.regionselection.WandContainer;
@@ -23,17 +24,20 @@ public final class SelectListener implements Listener {
     private void onPlayerInteract(PlayerInteractEvent event) {
         final Player player = event.getPlayer();
         final WandContainer wandContainer = this.plugin.getWandContainerRegistry().getContainer(player);
-        final WandSettings wandSettings = wandContainer.getSettings();
 
         if(player.getInventory().getItemInMainHand().getType() != Material.BREEZE_ROD) return;
         if(event.getHand() != EquipmentSlot.HAND) return;
         event.setCancelled(true);
 
-        if(event.getAction().isLeftClick())
-            wandContainer.getPersistent().selectRegion();
-        else if(event.getAction().isRightClick())
-            if(wandContainer.hasInstance(wandSettings.getVariant()))
-                wandContainer.getPersistent().clearWand();
+        if(event.getAction().isLeftClick()) {
+            wandContainer.getCore().selectRegion();
+            return;
+        }
+
+        if(event.getAction().isRightClick()) {
+            wandContainer.getCore().removeSavedShard();
+            return;
+        }
     }
 
     @EventHandler
@@ -54,8 +58,15 @@ public final class SelectListener implements Listener {
         final WandContainer wandContainer = this.plugin.getWandContainerRegistry().getContainer(player);
         final ItemStack item = player.getInventory().getItem(event.getNewSlot());
 
-        if(item != null && item.getType() == Material.BREEZE_ROD) wandContainer.getPersistent().update();
-        else if(this.plugin.getWandContainerRegistry().hasContainer(player) && wandContainer.getPersistent().isPreviewActive())
-            wandContainer.getPersistent().unselect();
+        if(item != null && item.getType() == Material.BREEZE_ROD) {
+            wandContainer.getCore().tickOutline();
+            return;
+        }
+
+        if(wandContainer != null) {
+            RegionCore regionCore = wandContainer.getCore();
+
+            regionCore.removeNonSaved();
+        }
     }
 }
