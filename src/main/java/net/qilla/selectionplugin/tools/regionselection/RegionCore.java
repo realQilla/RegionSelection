@@ -36,6 +36,7 @@ public final class RegionCore {
     private final WandContainer container;
     private final WandSettings settings;
 
+    private BukkitTask tickInfo;
     private BukkitTask tickTask;
     private Block previewPos;
     private List<CraftBlockDisplay> outline;
@@ -48,7 +49,7 @@ public final class RegionCore {
     }
 
     public void selectRegion() {
-        RegionShard regionShard = this.container.getShard(this.settings.getVariant());
+        RegionShard regionShard = this.container.getActiveShard();
 
         if(regionShard != null) {
 
@@ -85,6 +86,7 @@ public final class RegionCore {
 
         this.previewPos = scanForward();
         this.outline = createCuboid(new CuboidRegion(this.previewPos, this.previewPos), WandVariant.WHITE);
+        tickInfo(false);
 
         this.tickTask = Bukkit.getScheduler().runTaskTimer(this.plugin, () -> {
             final Block forwardScan = scanForward();
@@ -101,8 +103,6 @@ public final class RegionCore {
                     updateLoc(this.cachedShard.getOutline(), this.cachedShard.getRegion());
                 }
             }
-
-            this.container.getPlayer().sendActionBar(MiniMessage.miniMessage().deserialize("<yellow>Want variant <#" + this.settings.getVariant().getHex() + "><bold>" + this.settings.getVariant() + "</#" + this.settings.getVariant().getHex() + "></yellow>"));
         }, 0, 1);
     }
 
@@ -116,6 +116,7 @@ public final class RegionCore {
             nmsPlayer.connection.sendPacket(new ClientboundRemoveEntitiesPacket(entity.getEntityId()));
         });
         this.outline = null;
+        clearTickInfo();
 
         if(this.cachedShard != null) {
             this.cachedShard.clearOutline();
@@ -136,6 +137,24 @@ public final class RegionCore {
             this.container.getPlayer().sendMessage(MiniMessage.miniMessage().deserialize("<yellow>Region <bold><#" + this.settings.getVariant().getHex() + ">" + this.settings.getVariant() + "</#" + this.settings.getVariant().getHex() + "> <red>REMOVED</red></bold> successfully!</yellow>"));
             this.container.getPlayer().playSound(this.container.getPlayer(), Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1, 1);
         }
+    }
+
+    public void tickInfo(boolean update) {
+        if(update) {
+            this.container.getPlayer().sendActionBar(MiniMessage.miniMessage().deserialize("<yellow>Want variant <#" + this.settings.getVariant().getHex() + "><bold>" + this.settings.getVariant() + "</#" + this.settings.getVariant().getHex() + "></yellow>"));
+            return;
+        }
+        if(this.tickInfo != null) return;
+        this.tickInfo = Bukkit.getScheduler().runTaskTimer(this.plugin, () -> {
+            this.container.getPlayer().sendActionBar(MiniMessage.miniMessage().deserialize("<yellow>Want variant <#" + this.settings.getVariant().getHex() + "><bold>" + this.settings.getVariant() + "</#" + this.settings.getVariant().getHex() + "></yellow>"));
+        },0, 40);
+    }
+
+    public void clearTickInfo() {
+        if(tickInfo == null) return;
+        this.tickInfo.cancel();
+        this.tickInfo = null;
+        this.container.getPlayer().sendActionBar(MiniMessage.miniMessage().deserialize(""));
     }
 
     private Block scanForward() {

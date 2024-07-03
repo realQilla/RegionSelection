@@ -5,6 +5,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
+import net.qilla.selectionplugin.gui.general.GetTool;
 import org.bukkit.entity.Player;
 
 public final class ToolsCom {
@@ -28,6 +29,8 @@ public final class ToolsCom {
 
     private int open(CommandContext<CommandSourceStack> context) {
         final Player player = (Player) context.getSource().getSender();
+
+        new GetTool(player).openInventory();
         return Command.SINGLE_SUCCESS;
     }
 }

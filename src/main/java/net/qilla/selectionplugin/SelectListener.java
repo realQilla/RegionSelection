@@ -1,5 +1,6 @@
 package net.qilla.selectionplugin;
 
+import net.qilla.selectionplugin.assets.MetaKey;
 import net.qilla.selectionplugin.tools.regionselection.RegionCore;
 import net.qilla.selectionplugin.tools.regionselection.gui.RegionModification;
 import net.qilla.selectionplugin.tools.regionselection.WandSettings;
@@ -24,9 +25,12 @@ public final class SelectListener implements Listener {
     private void onPlayerInteract(PlayerInteractEvent event) {
         final Player player = event.getPlayer();
         final WandContainer wandContainer = this.plugin.getWandContainerRegistry().getContainer(player);
+        final ItemStack item = player.getInventory().getItemInMainHand();
 
-        if(player.getInventory().getItemInMainHand().getType() != Material.BREEZE_ROD) return;
         if(event.getHand() != EquipmentSlot.HAND) return;
+        if(!item.hasItemMeta()) return;
+        if(!item.getItemMeta().getPersistentDataContainer().has(MetaKey.ITEM_WAND_TOOL)) return;
+
         event.setCancelled(true);
 
         if(event.getAction().isLeftClick()) {
@@ -47,8 +51,10 @@ public final class SelectListener implements Listener {
         final WandSettings wandSettings = wandContainer.getSettings();
         final ItemStack item = player.getInventory().getItemInMainHand();
 
-        if(item.getType() != Material.BREEZE_ROD) return;
+        if(!item.hasItemMeta()) return;
+        if(!item.getItemMeta().getPersistentDataContainer().has(MetaKey.ITEM_WAND_TOOL)) return;
         event.setCancelled(true);
+
         new RegionModification(player, wandSettings, wandContainer).openInventory();
     }
 
@@ -58,9 +64,11 @@ public final class SelectListener implements Listener {
         final WandContainer wandContainer = this.plugin.getWandContainerRegistry().getContainer(player);
         final ItemStack item = player.getInventory().getItem(event.getNewSlot());
 
-        if(item != null && item.getType() == Material.BREEZE_ROD) {
-            wandContainer.getCore().tickOutline();
-            return;
+        if(item != null && item.hasItemMeta()) {
+            if(item.getItemMeta().getPersistentDataContainer().has(MetaKey.ITEM_WAND_TOOL)) {
+                wandContainer.getCore().tickOutline();
+                return;
+            }
         }
 
         if(wandContainer != null) {
@@ -68,5 +76,13 @@ public final class SelectListener implements Listener {
 
             regionCore.removeNonSaved();
         }
+    }
+
+    @EventHandler
+    private void onPlayerQuit(PlayerQuitEvent event) {
+        final Player player = event.getPlayer();
+        final WandContainer wandContainer = this.plugin.getWandContainerRegistry().getContainer(player);
+
+        wandContainer.getCore().removeNonSaved();
     }
 }

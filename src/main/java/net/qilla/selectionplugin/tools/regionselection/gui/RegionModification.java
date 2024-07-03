@@ -86,6 +86,7 @@ public final class RegionModification extends InventoryGUI {
                     player.playSound(player, Sound.BLOCK_LAVA_POP, 1, 2);
                 }
                 setVariantChange();
+                this.container.getCore().tickInfo(true);
                 break;
             }
             case 53: {
@@ -113,7 +114,8 @@ public final class RegionModification extends InventoryGUI {
                             this.player.playSound(player, Sound.ENTITY_VILLAGER_NO, 1, 1);
                         } else {
                             this.settings.setVariant(wandVariant);
-                            this.player.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>Region variant has been set to <#" + wandVariant.getHex() + "><bold>" + wandVariant + "</#" + wandVariant.getHex() + ">!</yellow>"));
+                            this.player.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>Region <bold><#" + wandVariant.getHex() + ">" + wandVariant + "</#" + wandVariant.getHex() + "></bold> has been <bold><green>SELECTED</green></bold>!</yellow>"));
+                            this.container.getCore().tickInfo(true);
                             this.player.playSound(player, Sound.BLOCK_LAVA_POP, 1, 2);
                         }
                         setVariantChange();
@@ -124,7 +126,7 @@ public final class RegionModification extends InventoryGUI {
                         this.container.removeShard(wandVariant);
                         removeItem(getValidSlots());
                         loadRegionSlots();
-                        this.player.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>Region" + " <#" + wandVariant.getHex() + "><bold>" + wandVariant + "</#" + wandVariant.getHex() + "> has been <red><bold>REMOVED</bold></red>!</yellow>"));
+                        this.player.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>Region" + " <bold><#" + wandVariant.getHex() + ">" + wandVariant + "</#" + wandVariant.getHex() + "> <red>REMOVED</red></bold> successfully!</yellow>"));
                         this.player.playSound(player, Sound.BLOCK_LAVA_POP, 1, 2);
                         break;
                     }
