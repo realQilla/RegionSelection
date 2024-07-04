@@ -28,6 +28,7 @@ import org.joml.Vector3f;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public final class RegionCore {
 
@@ -48,13 +49,14 @@ public final class RegionCore {
     }
 
     public void selectRegion() {
-        RegionShard regionShard = this.container.getActiveShard();
+        Optional<RegionShard> optRegionShard = this.container.getActiveShard();
 
-        if(regionShard != null) {
+        if(optRegionShard.isPresent()) {
+            RegionShard regionShard = optRegionShard.get();
 
             regionShard.getRegion().setEnd(previewPos);
             updateLoc(regionShard.getOutline(), regionShard.getRegion());
-            this.container.getPlayer().sendMessage(MiniMessage.miniMessage().deserialize("<yellow>Region <bold><#" + this.settings.getVariant().getHex() + ">" + this.settings.getVariant() + "</#" + this.settings.getVariant().getHex() + "> <aqua>UPDATED</aqua></bold> successfully. Size of " + NumberFormat.getInstance().format(this.container.getShard(this.settings.getVariant()).getRegion().getSize()) + " blocks!</yellow>"));
+            this.container.getPlayer().sendMessage(MiniMessage.miniMessage().deserialize("<yellow>Region <bold><#" + this.settings.getVariant().getHex() + ">" + this.settings.getVariant() + "</#" + this.settings.getVariant().getHex() + "> <aqua>UPDATED</aqua></bold> successfully. Size of " + NumberFormat.getInstance().format(regionShard.getRegion().getSize()) + " blocks!</yellow>"));
             this.container.getPlayer().playSound(this.container.getPlayer(), Sound.BLOCK_NOTE_BLOCK_BELL, 1, 2);
         } else {
             if(this.cachedShard == null) {

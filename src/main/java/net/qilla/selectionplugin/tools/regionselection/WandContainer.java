@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public final class WandContainer {
 
@@ -15,7 +16,7 @@ public final class WandContainer {
     private final RegionCore core;
     private final Map<WandVariant, RegionShard> regionShards;
 
-    public WandContainer(Player player) {
+    public WandContainer(@NotNull Player player) {
         this.player = player;
         this.settings = new WandSettings();
         this.core = new RegionCore(this);
@@ -41,13 +42,12 @@ public final class WandContainer {
         return this.core;
     }
 
-    @Nullable RegionShard getActiveShard() {
-        return this.regionShards.get(this.settings.getVariant());
+    Optional<RegionShard> getActiveShard() {
+        return Optional.ofNullable(this.regionShards.get(this.settings.getVariant()));
     }
 
-    @Nullable
-    public RegionShard getShard(@NotNull WandVariant wandVariant) {
-        return this.regionShards.get(wandVariant);
+    public Optional<RegionShard> getShard(@NotNull WandVariant wandVariant) {
+        return Optional.ofNullable(this.regionShards.get(wandVariant));
     }
 
     @NotNull

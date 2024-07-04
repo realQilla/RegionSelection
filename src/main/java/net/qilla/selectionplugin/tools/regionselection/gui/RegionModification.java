@@ -16,10 +16,7 @@ import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public final class RegionModification extends InventoryGUI {
 
@@ -34,113 +31,120 @@ public final class RegionModification extends InventoryGUI {
         this.settings = settings;
         this.container = container;
         this.variantMap = new HashMap<>();
-        loadRegionSlots();
+        savedRegionButton();
         setItem(Material.BARRIER, 53, item -> {
             item.editMeta(meta -> {
                 meta.displayName(MiniMessage.miniMessage().deserialize("<!italic><red>Remove all regions</red>"));
             });
         });
-        setWandReach();
-        setVariantChange();
+        wandReachButton();
+        cycleVariantButton();
     }
 
     @Override
     public void onOpen(@NotNull InventoryOpenEvent event) {
-
     }
 
     @Override
     public void onClose(@NotNull InventoryOpenEvent event) {
-
     }
 
     @Override
     public void onClick(@NotNull InventoryClickEvent event) {
         if(!(event.getInventory().getHolder() instanceof RegionModification)) return;
         event.setCancelled(true);
-        int slot = event.getSlot();
         if(event.getCurrentItem() == null) return;
+        int slot = event.getSlot();
 
         switch(slot) {
-            case 47: {
-                int amount = 1;
-                if(event.isShiftClick()) {
-                    amount = 5;
-                }
-                if(event.isLeftClick()) {
-                    this.settings.wandReach().increment(amount);
-                    player.playSound(player, Sound.BLOCK_LAVA_POP, 1, 2);
-                } else if(event.isRightClick()) {
-                    this.settings.wandReach().decrement(amount);
-                    player.playSound(player, Sound.BLOCK_LAVA_POP, 1, 2);
-                }
-                setWandReach();
-                break;
-            }
-            case 49: {
-                if(event.getClick().equals(ClickType.LEFT)) {
-                    this.settings.previousVariant();
-                    player.playSound(player, Sound.BLOCK_LAVA_POP, 1, 2);
-                } else if(event.getClick().equals(ClickType.RIGHT)) {
-                    this.settings.nextVariant();
-                    player.playSound(player, Sound.BLOCK_LAVA_POP, 1, 2);
-                }
-                setVariantChange();
-                this.container.getCore().tickInfo(true);
-                break;
-            }
-            case 53: {
-                if(this.container.getShards().isEmpty()) {
-                    player.sendMessage(MiniMessage.miniMessage().deserialize("<red>There are no existing regions!</red>"));
-                    player.playSound(player, Sound.ENTITY_VILLAGER_NO, 1, 1);
-                    break;
-                }
-                this.container.getShards().forEach(instance -> {
-                    this.container.removeShard(instance.getVariant());
-                });
-                loadRegionSlots();
-                player.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>All regions have been <red><bold>REMOVED</bold></red>!<yellow>"));
-                player.playSound(player, Sound.BLOCK_LAVA_POP, 1, 0);
-                break;
-            }
-            default: {
-                if(!this.variantMap.containsKey(slot)) return;
-                final WandVariant wandVariant = this.variantMap.get(slot);
-
-                switch(event.getClick()) {
-                    case LEFT: {
-                        if(wandVariant.equals(this.settings.getVariant())) {
-                            this.player.sendMessage(MiniMessage.miniMessage().deserialize("<red>Region" + " <#" + wandVariant.getHex() + "><bold>" + wandVariant + "</#" + wandVariant.getHex() + "> is already selected!</red>"));
-                            this.player.playSound(player, Sound.ENTITY_VILLAGER_NO, 1, 1);
-                        } else {
-                            this.settings.setVariant(wandVariant);
-                            this.player.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>Region <bold><#" + wandVariant.getHex() + ">" + wandVariant + "</#" + wandVariant.getHex() + "></bold> has been <bold><green>SELECTED</green></bold>!</yellow>"));
-                            this.container.getCore().tickInfo(true);
-                            this.player.playSound(player, Sound.BLOCK_LAVA_POP, 1, 2);
-                        }
-                        setVariantChange();
-                        break;
-                    }
-                    case RIGHT: {
-                        this.variantMap.remove(slot);
-                        this.container.removeShard(wandVariant);
-                        removeItem(getValidSlots());
-                        loadRegionSlots();
-                        this.player.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>Region" + " <bold><#" + wandVariant.getHex() + ">" + wandVariant + "</#" + wandVariant.getHex() + "> <red>REMOVED</red></bold> successfully!</yellow>"));
-                        this.player.playSound(player, Sound.BLOCK_LAVA_POP, 1, 2);
-                        break;
-                    }
-                    case ClickType.MIDDLE: {
-                        this.player.teleport(this.container.getShard(wandVariant).getRegion().getOrigin().getLocation());
-                        this.player.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>Teleported to region" + " <#" + wandVariant.getHex() + "><bold>" + wandVariant + "</#" + wandVariant.getHex() + ">!</yellow>"));
-                        this.player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, 1, 2);
-                    }
-                }
-            }
+            case 47 -> selectionReach(event);
+            case 49 -> cycleVariant(event);
+            case 53 -> clearRegions();
+            default -> modifyRegion(event, slot);
         }
     }
 
-    private void setWandReach() {
+    private void selectionReach(InventoryClickEvent event) {
+        int amount = event.isShiftClick() ? 5 : 1;
+
+        if(event.isLeftClick()) {
+            this.settings.wandReach().increment(amount);
+            player.playSound(player, Sound.BLOCK_LAVA_POP, 1, 2);
+        } else if(event.isRightClick()) {
+            this.settings.wandReach().decrement(amount);
+            player.playSound(player, Sound.BLOCK_LAVA_POP, 1, 1.5f);
+        }
+        wandReachButton();
+    }
+
+    private void cycleVariant(InventoryClickEvent event) {
+        if(event.getClick().equals(ClickType.LEFT)) {
+            this.settings.previousVariant();
+            player.playSound(player, Sound.BLOCK_LAVA_POP, 1, 2);
+        } else if(event.getClick().equals(ClickType.RIGHT)) {
+            this.settings.nextVariant();
+            player.playSound(player, Sound.BLOCK_LAVA_POP, 1, 1.5f);
+        }
+        cycleVariantButton();
+        this.container.getCore().tickInfo(true);
+    }
+
+    private void clearRegions() {
+        if(this.container.getShards().isEmpty()) {
+            player.sendMessage(MiniMessage.miniMessage().deserialize("<red>There are no existing regions!</red>"));
+            player.playSound(player, Sound.ENTITY_VILLAGER_NO, 1, 1);
+        } else {
+            this.container.getShards().forEach(instance -> {
+                this.container.removeShard(instance.getVariant());
+            });
+            savedRegionButton();
+            player.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>All regions have been <red><bold>REMOVED</bold></red>!<yellow>"));
+            player.playSound(player, Sound.BLOCK_LAVA_POP, 1, 0);
+        }
+    }
+
+    private void modifyRegion(InventoryClickEvent event, int slot) {
+        if(!this.variantMap.containsKey(slot)) return;
+
+        WandVariant wandVariant = this.variantMap.get(slot);
+        this.container.getShard(wandVariant).ifPresent(shard -> {
+            switch(event.getClick()) {
+                case LEFT -> modifyRegionSelect(wandVariant);
+                case RIGHT -> modifyRegionRemove(wandVariant, slot);
+                case MIDDLE -> modifyRegionTeleport(wandVariant, shard);
+            }
+        });
+    }
+
+    private void modifyRegionSelect(WandVariant wandVariant) {
+        if(wandVariant.equals(this.settings.getVariant())) {
+            this.player.sendMessage(MiniMessage.miniMessage().deserialize("<red>Region" + " <#" + wandVariant.getHex() + "><bold>" + wandVariant + "</#" + wandVariant.getHex() + "> is already selected!</red>"));
+            this.player.playSound(player, Sound.ENTITY_VILLAGER_NO, 1, 2);
+        } else {
+            this.settings.setVariant(wandVariant);
+            this.player.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>Region <bold><#" + wandVariant.getHex() + ">" + wandVariant + "</#" + wandVariant.getHex() + "></bold> has been <bold><green>SELECTED</green></bold>!</yellow>"));
+            this.container.getCore().tickInfo(true);
+            this.player.playSound(player, Sound.BLOCK_LAVA_POP, 1, 2);
+        }
+        cycleVariantButton();
+    }
+
+    private void modifyRegionRemove(WandVariant wandVariant, int slot) {
+        this.variantMap.remove(slot);
+        this.container.removeShard(wandVariant);
+        removeItem(getValidSlots());
+        savedRegionButton();
+        this.player.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>Region" + " <bold><#" + wandVariant.getHex() + ">" + wandVariant + "</#" + wandVariant.getHex() + "> <red>REMOVED</red></bold> successfully!</yellow>"));
+        this.player.playSound(player, Sound.BLOCK_LAVA_POP, 1, 1);
+    }
+
+    private void modifyRegionTeleport(WandVariant wandVariant, RegionShard shard) {
+        this.player.teleport(shard.getRegion().getOrigin().getLocation());
+        this.player.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>Teleported to region" + " <#" + wandVariant.getHex() + "><bold>" + wandVariant + "</#" + wandVariant.getHex() + ">!</yellow>"));
+        this.player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, 1, 2);
+    }
+
+    private void wandReachButton() {
         setItem(Material.SPYGLASS, 47, item -> {
             item.editMeta(meta -> {
                 meta.displayName(MiniMessage.miniMessage().deserialize("<!italic><green>Change Selection Reach</green>"));
@@ -154,7 +158,7 @@ public final class RegionModification extends InventoryGUI {
         });
     }
 
-    private void setVariantChange() {
+    private void cycleVariantButton() {
         setItem(settings.getVariant().getGUIMaterial(), 49, item -> {
             item.editMeta(meta -> {
                 meta.displayName(MiniMessage.miniMessage().deserialize("<!italic><green>Change Region Variant</green>"));
@@ -167,7 +171,7 @@ public final class RegionModification extends InventoryGUI {
         });
     }
 
-    private void loadRegionSlots() {
+    private void savedRegionButton() {
         List<RegionShard> regionShards = container.getShards();
         List<Integer> validSlots = new ArrayList<>(getValidSlots());
         for(RegionShard regionShard : regionShards) {

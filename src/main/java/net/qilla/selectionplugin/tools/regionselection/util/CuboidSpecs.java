@@ -1,11 +1,13 @@
 package net.qilla.selectionplugin.tools.regionselection.util;
 
+import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3f;
 
 public final class CuboidSpecs {
 
     private static final float edgeSize = 0.05f;
 
+    @NotNull
     public static Vector3f[] getPositions(int xDistance, int yDistance, int zDistance) {
         return new Vector3f[]{new Vector3f(0.05f, yDistance - 0.05f, 0), // Top Left Front
                 new Vector3f(0, yDistance - 0.05f, 0.05f), // Top Right Front
@@ -24,6 +26,7 @@ public final class CuboidSpecs {
         };
     }
 
+    @NotNull
     public static Vector3f[] getSizes(int xDistance, int yDistance, int zDistance) {
 
         return new Vector3f[]{new Vector3f(xDistance - 0.1f, edgeSize, edgeSize), // Top Left Front
