@@ -7,6 +7,7 @@ import net.qilla.selectionplugin.command.ToolsCom;
 import net.qilla.selectionplugin.command.WandCom;
 import net.qilla.selectionplugin.gui.GUIListener;
 import net.qilla.selectionplugin.tools.regionselection.WandContainerRegistry;
+import net.qilla.selectionplugin.tools.router.ToolListener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -17,7 +18,7 @@ public final class SelectionPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        getServer().getPluginManager().registerEvents(new SelectListener(this), this);
+        getServer().getPluginManager().registerEvents(new ToolListener(this), this);
         getServer().getPluginManager().registerEvents(new GUIListener(), this);
         registerCommands();
     }

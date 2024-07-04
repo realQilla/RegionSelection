@@ -32,7 +32,6 @@ import java.util.List;
 public final class RegionCore {
 
     private final Plugin plugin = SelectionPlugin.getInstance();
-
     private final WandContainer container;
     private final WandSettings settings;
 
@@ -83,7 +82,6 @@ public final class RegionCore {
         if(this.outline != null) return;
 
         ServerPlayer nmsPlayer = ((CraftPlayer) this.container.getPlayer()).getHandle();
-
         this.previewPos = scanForward();
         this.outline = createCuboid(new CuboidRegion(this.previewPos, this.previewPos), WandVariant.WHITE);
         tickInfo(false);
@@ -109,12 +107,15 @@ public final class RegionCore {
     public void removeNonSaved() {
         if(this.outline == null) return;
 
-        ServerPlayer nmsPlayer = ((CraftPlayer) this.container.getPlayer()).getHandle();
+        if(this.container.getPlayer().isOnline()) {
+            ServerPlayer nmsPlayer = ((CraftPlayer) this.container.getPlayer()).getHandle();
 
-        this.tickTask.cancel();
-        this.outline.forEach(entity -> {
-            nmsPlayer.connection.sendPacket(new ClientboundRemoveEntitiesPacket(entity.getEntityId()));
-        });
+            this.tickTask.cancel();
+            this.outline.forEach(entity -> {
+                nmsPlayer.connection.sendPacket(new ClientboundRemoveEntitiesPacket(entity.getEntityId()));
+            });
+        }
+
         this.outline = null;
         clearTickInfo();
 
@@ -141,12 +142,12 @@ public final class RegionCore {
 
     public void tickInfo(boolean update) {
         if(update) {
-            this.container.getPlayer().sendActionBar(MiniMessage.miniMessage().deserialize("<yellow>Want variant <#" + this.settings.getVariant().getHex() + "><bold>" + this.settings.getVariant() + "</#" + this.settings.getVariant().getHex() + "></yellow>"));
+            this.container.getPlayer().sendActionBar(MiniMessage.miniMessage().deserialize("<yellow>Selection variant <#" + this.settings.getVariant().getHex() + "><bold>" + this.settings.getVariant() + "</#" + this.settings.getVariant().getHex() + "></yellow>"));
             return;
         }
         if(this.tickInfo != null) return;
         this.tickInfo = Bukkit.getScheduler().runTaskTimer(this.plugin, () -> {
-            this.container.getPlayer().sendActionBar(MiniMessage.miniMessage().deserialize("<yellow>Want variant <#" + this.settings.getVariant().getHex() + "><bold>" + this.settings.getVariant() + "</#" + this.settings.getVariant().getHex() + "></yellow>"));
+            this.container.getPlayer().sendActionBar(MiniMessage.miniMessage().deserialize("<yellow>Selection variant <#" + this.settings.getVariant().getHex() + "><bold>" + this.settings.getVariant() + "</#" + this.settings.getVariant().getHex() + "></yellow>"));
         },0, 40);
     }
 
@@ -194,7 +195,7 @@ public final class RegionCore {
             CraftBlockDisplay display = new CraftBlockDisplay(craftServer, net.minecraft.world.entity.EntityType.BLOCK_DISPLAY.create(nmsWorld));
             display.setGlowing(true);
             display.setGlowColorOverride(variant.getColor());
-            display.setBlock(variant.getMaterial().createBlockData());
+            display.setBlock(variant.getMainMaterial().createBlockData());
             display.setBrightness(new Display.Brightness(15, 15));
             display.setTransformation(new Transformation(
                     position,

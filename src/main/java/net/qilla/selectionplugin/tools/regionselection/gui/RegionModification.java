@@ -29,7 +29,7 @@ public final class RegionModification extends InventoryGUI {
     private final Map<Integer, WandVariant> variantMap;
 
     public RegionModification(@NotNull Player player, @NotNull WandSettings settings, @NotNull WandContainer container) {
-        super(player, 54, MiniMessage.miniMessage().deserialize("Active Regions"));
+        super(player, 54, MiniMessage.miniMessage().deserialize("Saved Regions"));
         this.player = player;
         this.settings = settings;
         this.container = container;
@@ -37,7 +37,7 @@ public final class RegionModification extends InventoryGUI {
         loadRegionSlots();
         setItem(Material.BARRIER, 53, item -> {
             item.editMeta(meta -> {
-                meta.displayName(MiniMessage.miniMessage().deserialize("<!italic><red>Remove all existing region variants</red>"));
+                meta.displayName(MiniMessage.miniMessage().deserialize("<!italic><red>Remove all regions</red>"));
             });
         });
         setWandReach();
@@ -155,7 +155,7 @@ public final class RegionModification extends InventoryGUI {
     }
 
     private void setVariantChange() {
-        setItem(settings.getVariant().getMaterial(), 49, item -> {
+        setItem(settings.getVariant().getGUIMaterial(), 49, item -> {
             item.editMeta(meta -> {
                 meta.displayName(MiniMessage.miniMessage().deserialize("<!italic><green>Change Region Variant</green>"));
                 List<Component> lore = new ArrayList<>();
@@ -173,7 +173,7 @@ public final class RegionModification extends InventoryGUI {
         for(RegionShard regionShard : regionShards) {
             int validSlot = validSlots.removeFirst();
             this.variantMap.put(validSlot, regionShard.getVariant());
-            setItem(regionShard.getVariant().getMaterial(), validSlot, item -> {
+            setItem(regionShard.getVariant().getGUIMaterial(), validSlot, item -> {
                 item.editMeta(meta -> {
                     meta.displayName(MiniMessage.miniMessage().deserialize("<!italic><yellow>Region <#" + regionShard.getVariant().getHex() + "><bold>" + regionShard.getVariant() + "</#" + regionShard.getVariant().getHex() + "></yellow>"));
                     List<Component> lore = new ArrayList<>();
@@ -192,7 +192,7 @@ public final class RegionModification extends InventoryGUI {
         validSlots.forEach(slot -> {
             setItem(Material.BLACK_STAINED_GLASS_PANE, slot, item -> {
                 item.editMeta(meta -> {
-                    meta.displayName(MiniMessage.miniMessage().deserialize("<!italic><gray>Empty Slot</gray>"));
+                    meta.displayName(MiniMessage.miniMessage().deserialize("<!italic><gray>Empty region</gray>"));
                 });
             });
         });
